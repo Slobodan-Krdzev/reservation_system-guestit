@@ -1,0 +1,15 @@
+import { Router } from 'express';
+import authRoutes from './auth.routes';
+import userRoutes from './user.routes';
+import reservationRoutes from './reservation.routes';
+import floorplanRoutes from './floorplan.routes';
+
+const router = Router();
+
+router.use('/auth', authRoutes);
+router.use('/', userRoutes);
+router.use('/reservations', reservationRoutes);
+router.use('/floorplans', floorplanRoutes);
+
+export default router;
+
