@@ -41,7 +41,7 @@ export const AuthPage = () => {
     setServerMessage(null);
     try {
       const { data } = await api.post('/auth/login', values);
-      setCredentials({ user: data.user, token: data.token });
+      setCredentials({ user: data.user, token: data.token, refreshToken: data.refreshToken });
       navigate('/floorplan');
     } catch (error: unknown) {
       setServerMessage('Login failed. Check your credentials.');
@@ -81,7 +81,7 @@ export const AuthPage = () => {
         lastName: 'User',
         oauthId: crypto.randomUUID(),
       });
-      setCredentials({ user: data.user, token: data.token });
+      setCredentials({ user: data.user, token: data.token, refreshToken: data.refreshToken || '' });
       navigate('/floorplan');
     } catch {
       setServerMessage(`${provider} login failed (mock).`);

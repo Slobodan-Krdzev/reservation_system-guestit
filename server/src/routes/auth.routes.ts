@@ -5,6 +5,7 @@ import {
   verifyController,
   loginController,
   oauthController,
+  refreshController,
 } from '../controllers/auth.controller';
 import { validateRequest } from '../middleware/validateRequest';
 import { avatarUpload } from '../middleware/upload';
@@ -35,6 +36,7 @@ router.post('/login', [
 ]);
 
 router.post('/oauth', oauthController);
+router.post('/refresh', refreshController);
 
 export default router;
 

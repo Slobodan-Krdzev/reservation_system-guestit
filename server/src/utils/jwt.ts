@@ -23,3 +23,7 @@ export const verifyAccessToken = (token: string): JwtPayload => {
   return jwt.verify(token, env.jwtSecret) as JwtPayload;
 };
 
+export const verifyRefreshToken = (token: string): JwtPayload => {
+  return jwt.verify(token, env.refreshSecret) as JwtPayload;
+};
+

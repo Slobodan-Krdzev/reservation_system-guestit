@@ -1,4 +1,4 @@
-import { Schema, model, type Document } from 'mongoose';
+import { Schema, model, type Document, type Types } from 'mongoose';
 
 export type SubscriptionTier = 'free' | 'premium';
 export type SubscriptionStatus = 'inactive' | 'active' | 'past_due';
@@ -15,8 +15,10 @@ export interface IUser extends Document {
   subscription: {
     tier: SubscriptionTier;
     status: SubscriptionStatus;
+    startedAt?: Date;
     expiresAt?: Date;
   };
+  reservations: Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,6 +27,7 @@ const subscriptionSchema = new Schema(
   {
     tier: { type: String, enum: ['free', 'premium'], default: 'free' },
     status: { type: String, enum: ['inactive', 'active', 'past_due'], default: 'inactive' },
+    startedAt: Date,
     expiresAt: Date,
   },
   { _id: false },
@@ -41,6 +44,10 @@ const userSchema = new Schema<IUser>(
     isVerified: { type: Boolean, default: false },
     verificationToken: String,
     subscription: { type: subscriptionSchema, default: () => ({}) },
+    reservations: {
+      type: [{ type: Schema.Types.ObjectId, ref: 'Reservation' }],
+      default: [],
+    },
   },
   { timestamps: true },
 );
