@@ -1,19 +1,56 @@
+# Dependencies
 node_modules/
-.DS_Store
-dist/
-build/
-.env
-.env.local
-.vercel/
-.next/
-coverage/
-*.log
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+client/.env
+server/.env
+client/.env.local
+server/.env.local
+
+# Build outputs
+dist/
+build/
+.vercel/
+.next/
 .turbo/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Cache
 .cache/
-*.zip
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
 .idea/
 .vscode/
+*.swp
+*.swo
+*~
+
+# Archives
+*.zip
+*.tar.gz
+
+# Server specific
+server/dist/
+server/build/
+server/logs/
+server/.cache/
+server/.mongodb-binaries/
+server/node_modules/.cache/
 
