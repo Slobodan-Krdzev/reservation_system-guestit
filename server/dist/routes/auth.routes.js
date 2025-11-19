@@ -22,5 +22,6 @@ router.post('/login', [
     auth_controller_1.loginController,
 ]);
 router.post('/oauth', auth_controller_1.oauthController);
+router.post('/refresh', auth_controller_1.refreshController);
 exports.default = router;
 //# sourceMappingURL=auth.routes.js.map

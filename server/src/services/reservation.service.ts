@@ -142,7 +142,7 @@ export const approvePendingReservation = async (
   reservationId: string,
 ): Promise<IReservation | null> => {
   const reservation = await Reservation.findById(reservationId).populate<{
-    userId: { firstName: string; lastName: string; email: string };
+    userId: { firstName: string; lastName: string; email: string; _id: Types.ObjectId };
   }>('userId', 'firstName lastName email');
 
   if (!reservation) {
@@ -152,6 +152,11 @@ export const approvePendingReservation = async (
   if (reservation.status !== 'pending') {
     return null;
   }
+
+  // Extract userId ObjectId from populated document
+  const userIdObjectId = reservation.userId instanceof Types.ObjectId
+    ? reservation.userId
+    : (reservation.userId as { _id: Types.ObjectId })._id;
 
   reservation.status = 'active';
   await reservation.save();
@@ -178,7 +183,7 @@ export const approvePendingReservation = async (
   // Create in-app notification
   try {
     await Notification.create({
-      userId: reservation.userId,
+      userId: userIdObjectId,
       type: 'reservationApproved',
       message: `Your reservation for ${
         reservation.tableName || `Table ${reservation.tableId}`
@@ -190,7 +195,9 @@ export const approvePendingReservation = async (
     console.error(`Failed to create notification for reservation ${reservationId}:`, error);
   }
 
-  return reservation;
+  // Fetch the reservation again without populate to return the correct type
+  const updatedReservation = await Reservation.findById(reservationId);
+  return updatedReservation;
 };
 
 /**
@@ -207,12 +214,13 @@ export const processPendingReservations = async (): Promise<void> => {
 
   for (const reservation of pendingReservations) {
     try {
-      await approvePendingReservation(reservation._id.toString());
+      const reservationId = String(reservation._id);
+      await approvePendingReservation(reservationId);
       // eslint-disable-next-line no-console
-      console.log(`Auto-approved reservation ${reservation._id} (demo flow)`);
+      console.log(`Auto-approved reservation ${reservationId} (demo flow)`);
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error(`Failed to approve reservation ${reservation._id}:`, error);
+      console.error(`Failed to approve reservation ${String(reservation._id)}:`, error);
     }
   }
 };

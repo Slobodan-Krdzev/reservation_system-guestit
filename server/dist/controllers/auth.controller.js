@@ -1,9 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.oauthController = exports.loginController = exports.verifyController = exports.registerController = void 0;
+exports.refreshController = exports.oauthController = exports.loginController = exports.verifyController = exports.registerController = void 0;
 const auth_service_1 = require("../services/auth.service");
 const httpError_1 = require("../utils/httpError");
 const env_1 = require("../config/env");
+const jwt_1 = require("../utils/jwt");
+const User_1 = require("../models/User");
 const registerController = async (req, res) => {
     if (req.file) {
         req.body.avatarUrl = `/${req.file.path.replace(/\\/g, '/')}`;
@@ -48,6 +50,7 @@ const loginController = async (req, res) => {
             phone: user.phone,
             avatarUrl: user.avatarUrl,
             subscription: user.subscription,
+            reservations: user.reservations,
         },
     });
 };
@@ -57,7 +60,7 @@ const oauthController = async (req, res) => {
     if (!provider || !email || !firstName || !lastName || !oauthId) {
         throw (0, httpError_1.createHttpError)(400, 'Missing OAuth payload');
     }
-    const { user, accessToken } = await (0, auth_service_1.oauthLogin)({
+    const { user, accessToken, refreshToken } = await (0, auth_service_1.oauthLogin)({
         provider,
         email,
         firstName,
@@ -72,13 +75,38 @@ const oauthController = async (req, res) => {
     });
     res.json({
         token: accessToken,
+        refreshToken,
         user: {
             id: user.id,
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
+            reservations: user.reservations,
         },
     });
 };
 exports.oauthController = oauthController;
+const refreshController = async (req, res) => {
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+        throw (0, httpError_1.createHttpError)(400, 'Refresh token is required');
+    }
+    try {
+        const payload = (0, jwt_1.verifyRefreshToken)(refreshToken);
+        const user = await User_1.User.findById(payload.sub);
+        if (!user) {
+            throw (0, httpError_1.createHttpError)(401, 'Invalid refresh token');
+        }
+        const newAccessToken = (0, jwt_1.generateAccessToken)(user.id);
+        const newRefreshToken = (0, jwt_1.generateRefreshToken)(user.id);
+        res.json({
+            token: newAccessToken,
+            refreshToken: newRefreshToken,
+        });
+    }
+    catch (error) {
+        throw (0, httpError_1.createHttpError)(401, 'Invalid or expired refresh token');
+    }
+};
+exports.refreshController = refreshController;
 //# sourceMappingURL=auth.controller.js.map
