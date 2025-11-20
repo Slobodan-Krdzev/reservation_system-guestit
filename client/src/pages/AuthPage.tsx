@@ -134,7 +134,7 @@ export const AuthPage = () => {
       </form>
     ) : (
       <form
-        className="grid gap-4 sm:grid-cols-2"
+        className="grid gap-4 grid-cols-2 "
         onSubmit={registerForm.handleSubmit(handleRegister)}
         noValidate
       >
@@ -248,7 +248,7 @@ export const AuthPage = () => {
             }
           `}</style>
         </div>
-        <div className="sm:col-span-2">
+        <div className="col-span-2">
           <label className="block text-sm font-medium text-white">
             {t('auth.password')}
           </label>
@@ -261,7 +261,7 @@ export const AuthPage = () => {
         <button
           type="submit"
           disabled={loading}
-          className="sm:col-span-2 rounded-lg bg-white py-2 text-black shadow hover:bg-gray-200"
+          className="col-span-2 rounded-lg bg-white py-2 text-black shadow hover:bg-gray-200"
         >
           {loading ? '...' : t('auth.register')}
         </button>
@@ -270,7 +270,7 @@ export const AuthPage = () => {
 
   return (
     <section className="w-[100dvw] min-h-[100dvh] flex justify-center items-center bg-cover" style={{ backgroundImage: 'url(/bg.png)' }}>
-    <section className="grid max-w-4xl xl:max-w-6xl bg-[#1A1A1B] text-slate-900 lg:grid-cols-2 border border-[#838383]/70 rounded-3xl shadow-2xl shadow-white/50">
+    <section className="grid max-w-[90%] sm:max-w-4xl xl:max-w-6xl bg-[#1A1A1B] text-slate-900 lg:grid-cols-2 rounded-3xl shadow-2xl shadow-white/50">
       <div className="relative hidden overflow-hidden lg:flex rounded-3xl">
         <img
           src='/login.png'
