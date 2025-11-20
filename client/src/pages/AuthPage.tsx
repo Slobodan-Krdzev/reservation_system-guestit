@@ -134,9 +134,10 @@ export const AuthPage = () => {
       </form>
     ) : (
       <form
-        className="grid gap-4 grid-cols-2 "
+        className="grid gap-4 grid-cols-2 relative"
         onSubmit={registerForm.handleSubmit(handleRegister)}
         noValidate
+        style={{ overflow: 'visible' }}
       >
         {(['firstName', 'lastName'] as const).map((field) => (
           <div key={field}>
@@ -164,7 +165,7 @@ export const AuthPage = () => {
           <label className="block text-sm font-medium text-white">
             {t('auth.phone')}
           </label>
-          <div className="mt-1 relative">
+          <div className="mt-1 relative" style={{ zIndex: 10 }}>
             <Controller
               name="phone"
               control={registerForm.control}
@@ -173,7 +174,7 @@ export const AuthPage = () => {
                 <PhoneInput
                   {...field}
                   international
-                  defaultCountry="US"
+                  defaultCountry="NL"
                   className="phone-input-wrapper"
                 />
               )}
@@ -182,6 +183,7 @@ export const AuthPage = () => {
           <style>{`
             .phone-input-wrapper {
               position: relative;
+              z-index: 10;
             }
             .phone-input-wrapper .PhoneInput {
               display: flex;
@@ -193,7 +195,7 @@ export const AuthPage = () => {
               left: 0.75rem;
               top: 50%;
               transform: translateY(-50%);
-              z-index: 2;
+              z-index: 11;
               display: flex;
               align-items: center;
             }
@@ -201,24 +203,31 @@ export const AuthPage = () => {
               background: transparent;
               border: none;
               outline: none;
-              padding: 0;
+              padding: 0.5rem;
               cursor: pointer;
               display: flex;
               align-items: center;
               transition: opacity 0.2s;
+              position: relative;
+              z-index: 12;
+              -webkit-tap-highlight-color: transparent;
+              touch-action: manipulation;
+              min-width: 2.5rem;
+              min-height: 2.5rem;
             }
             .phone-input-wrapper .PhoneInputCountrySelect:hover {
               opacity: 0.8;
+            }
+            .phone-input-wrapper .PhoneInputCountrySelect:active {
+              opacity: 0.6;
             }
             .phone-input-wrapper .PhoneInputCountrySelect:focus {
               outline: none;
               border: none;
             }
             .phone-input-wrapper .PhoneInputCountryIcon {
-              
               border: none;
               outline: none;
-              
             }
             .phone-input-wrapper .PhoneInputCountrySelectArrow {
               display: none;
@@ -245,6 +254,55 @@ export const AuthPage = () => {
               -moz-appearance: none;
               border: none;
               outline: none;
+              position: absolute;
+              width: 3rem;
+              height: 2.5rem;
+              top: 50%;
+              left: 0;
+              transform: translateY(-50%);
+              cursor: pointer;
+              z-index: 13;
+              opacity: 0;
+              font-size: 0;
+            }
+            @media (max-width: 640px) {
+              .phone-input-wrapper select.PhoneInputCountrySelect {
+                opacity: 1;
+                width: 3rem;
+                height: 2.5rem;
+                background: transparent;
+              }
+            }
+            .phone-input-wrapper .PhoneInputCountrySelectMenu {
+              position: absolute !important;
+              top: 100% !important;
+              left: 0 !important;
+              margin-top: 0.25rem !important;
+              z-index: 99999 !important;
+              background-color: #1A1A1B !important;
+              border: 1px solid rgba(255, 255, 255, 0.1) !important;
+              border-radius: 0.5rem !important;
+              max-height: 20rem !important;
+              overflow-y: auto !important;
+              box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+              min-width: 280px !important;
+            }
+            .phone-input-wrapper .PhoneInputCountryOption {
+              padding: 0.75rem 1rem !important;
+              cursor: pointer !important;
+              color: white !important;
+              display: flex !important;
+              align-items: center !important;
+              gap: 0.5rem !important;
+              -webkit-tap-highlight-color: transparent;
+              touch-action: manipulation;
+            }
+            .phone-input-wrapper .PhoneInputCountryOption:hover,
+            .phone-input-wrapper .PhoneInputCountryOption:active {
+              background-color: rgba(255, 255, 255, 0.1) !important;
+            }
+            .phone-input-wrapper .PhoneInputCountryOption--selected {
+              background-color: rgba(255, 255, 255, 0.15) !important;
             }
           `}</style>
         </div>
