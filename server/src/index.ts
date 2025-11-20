@@ -55,5 +55,8 @@ const bootstrap = async () => {
   log('Reservation scheduler started');
 };
 
-void bootstrap();
+bootstrap().catch((error) => {
+  logError('Failed to bootstrap application', error);
+  process.exitCode = 1;
+});
 

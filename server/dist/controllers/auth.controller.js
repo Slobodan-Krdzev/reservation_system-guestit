@@ -7,6 +7,9 @@ const env_1 = require("../config/env");
 const jwt_1 = require("../utils/jwt");
 const User_1 = require("../models/User");
 const registerController = async (req, res) => {
+    // Debug: log the request body to see what's being received
+    // eslint-disable-next-line no-console
+    console.log('Register request body:', req.body);
     if (req.file) {
         req.body.avatarUrl = `/${req.file.path.replace(/\\/g, '/')}`;
     }
