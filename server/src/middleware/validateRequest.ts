@@ -5,7 +5,8 @@ import { createHttpError } from '../utils/httpError';
 export const validateRequest = (req: Request, _res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    throw createHttpError(400, 'Validation failed');
+    const errorMessages = errors.array().map((err) => `${err.param}: ${err.msg}`).join(', ');
+    throw createHttpError(400, `Validation failed: ${errorMessages}`);
   }
   next();
 };

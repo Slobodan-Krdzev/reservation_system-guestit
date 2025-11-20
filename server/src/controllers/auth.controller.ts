@@ -6,6 +6,10 @@ import { verifyRefreshToken, generateAccessToken, generateRefreshToken } from '.
 import { User } from '../models/User';
 
 export const registerController = async (req: Request, res: Response) => {
+  // Debug: log the request body to see what's being received
+  // eslint-disable-next-line no-console
+  console.log('Register request body:', req.body);
+  
   if (req.file) {
     req.body.avatarUrl = `/${req.file.path.replace(/\\/g, '/')}`;
   }

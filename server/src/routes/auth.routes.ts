@@ -12,15 +12,23 @@ import { avatarUpload } from '../middleware/upload';
 
 const router = Router();
 
+// Middleware to handle avatar upload only if Content-Type is multipart/form-data
+const handleAvatarUpload = (req: any, res: any, next: any) => {
+  if (req.headers['content-type']?.includes('multipart/form-data')) {
+    return avatarUpload.single('avatar')(req, res, next);
+  }
+  next();
+};
+
 router.post(
   '/register',
-  avatarUpload.single('avatar'),
+  handleAvatarUpload,
   [
-    body('firstName').isLength({ min: 2 }),
-    body('lastName').isLength({ min: 2 }),
-    body('email').isEmail(),
-    body('phone').isString().isLength({ min: 6 }),
-    body('password').isLength({ min: 6 }),
+    body('firstName').trim().isLength({ min: 2 }).withMessage('First name must be at least 2 characters'),
+    body('lastName').trim().isLength({ min: 2 }).withMessage('Last name must be at least 2 characters'),
+    body('email').trim().isEmail().withMessage('Invalid email address'),
+    body('phone').trim().isString().isLength({ min: 6 }).withMessage('Phone must be at least 6 characters'),
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
     validateRequest,
   ],
   registerController,

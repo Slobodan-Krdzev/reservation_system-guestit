@@ -43,7 +43,7 @@ export const AuthPage = () => {
       const { data } = await api.post('/auth/login', values);
       setCredentials({ user: data.user, token: data.token, refreshToken: data.refreshToken });
       navigate('/floorplan');
-    } catch (error: unknown) {
+    } catch {
       setServerMessage('Login failed. Check your credentials.');
     } finally {
       setLoading(false);
@@ -54,19 +54,17 @@ export const AuthPage = () => {
     setLoading(true);
     setServerMessage(null);
     try {
-      const formData = new FormData();
-      Object.entries(values).forEach(([key, value]) => {
-        if (typeof value === 'string') {
-          formData.append(key, value);
-        }
-      });
-      await api.post('/auth/register', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      // Send as JSON since we're not uploading an avatar anymore
+      await api.post('/auth/register', values);
       setServerMessage('Registration successful! Check email to verify before login.');
       setMode('login');
     } catch (error: unknown) {
-      setServerMessage('Registration failed. Please try again.');
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        setServerMessage(axiosError.response?.data?.message || 'Registration failed. Please try again.');
+      } else {
+        setServerMessage('Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
