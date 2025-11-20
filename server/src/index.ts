@@ -4,18 +4,20 @@ import { connectDb } from './config/db';
 import { env } from './config/env';
 import { startReservationScheduler } from './services/scheduler.service';
 
+const formatMessage = (message: string) => `[${new Date().toISOString()}] [server] ${message}`;
+
 const log = (message: string, extra?: unknown) => {
-  const timestamp = new Date().toISOString();
+  const base = formatMessage(message);
   if (extra) {
-    console.log(`[${timestamp}] [server] ${message}`, extra);
+    process.stdout.write(`${base} ${JSON.stringify(extra)}\n`);
     return;
   }
-  console.log(`[${timestamp}] [server] ${message}`);
+  process.stdout.write(`${base}\n`);
 };
 
 const logError = (message: string, error: unknown) => {
-  const timestamp = new Date().toISOString();
-  console.error(`[${timestamp}] [server] ${message}`, error);
+  const base = formatMessage(message);
+  process.stderr.write(`${base} ${error instanceof Error ? error.stack ?? error.message : JSON.stringify(error)}\n`);
 };
 
 const registerProcessHandlers = () => {
