@@ -1,6 +1,6 @@
 import { Schema, model, type Document, type Types } from 'mongoose';
 
-export type NotificationType = 'reservationApproved';
+export type NotificationType = 'reservationApproved' | 'reservationCancelled';
 
 export interface INotification extends Document {
   userId: Types.ObjectId;
@@ -15,7 +15,7 @@ export interface INotification extends Document {
 const notificationSchema = new Schema<INotification>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    type: { type: String, enum: ['reservationApproved'], required: true },
+    type: { type: String, enum: ['reservationApproved', 'reservationCancelled'], required: true },
     message: { type: String, required: true },
     reservationId: { type: Schema.Types.ObjectId, ref: 'Reservation' },
     read: { type: Boolean, default: false },

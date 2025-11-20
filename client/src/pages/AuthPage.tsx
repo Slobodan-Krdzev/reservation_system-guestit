@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/auth';
 import { SocialButtons } from '../components/auth/SocialButtons';
@@ -95,7 +97,7 @@ export const AuthPage = () => {
       >
         <div>
           <label className="block text-sm font-medium text-white">
-            {t('auth.email')} / {t('auth.phone')}
+            {t('auth.email')} 
           </label>
           <input
             type="text"
@@ -127,18 +129,126 @@ export const AuthPage = () => {
         onSubmit={registerForm.handleSubmit(handleRegister)}
         noValidate
       >
-        {(['firstName', 'lastName', 'email', 'phone', 'password'] as const).map((field) => (
-          <div key={field} className={field === 'password' ? 'sm:col-span-2' : ''}>
+        {(['firstName', 'lastName'] as const).map((field) => (
+          <div key={field}>
             <label className="block text-sm font-medium text-white">
               {t(`auth.${field}` as const)}
             </label>
             <input
-              type={field === 'password' ? 'password' : 'text'}
+              type="text"
               {...registerForm.register(field, { required: true })}
               className="mt-1 w-full rounded-md bg-[#3C3C3C] px-3 py-2 text-white"
             />
           </div>
         ))}
+        <div>
+          <label className="block text-sm font-medium text-white">
+            {t('auth.email')}
+          </label>
+          <input
+            type="email"
+            {...registerForm.register('email', { required: true })}
+            className="mt-1 w-full rounded-md bg-[#3C3C3C] px-3 py-2 text-white"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-white">
+            {t('auth.phone')}
+          </label>
+          <div className="mt-1 relative">
+            <Controller
+              name="phone"
+              control={registerForm.control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <PhoneInput
+                  {...field}
+                  international
+                  defaultCountry="US"
+                  className="phone-input-wrapper"
+                />
+              )}
+            />
+          </div>
+          <style>{`
+            .phone-input-wrapper {
+              position: relative;
+            }
+            .phone-input-wrapper .PhoneInput {
+              display: flex;
+              align-items: center;
+              position: relative;
+            }
+            .phone-input-wrapper .PhoneInputCountry {
+              position: absolute;
+              left: 0.75rem;
+              top: 50%;
+              transform: translateY(-50%);
+              z-index: 2;
+              display: flex;
+              align-items: center;
+            }
+            .phone-input-wrapper .PhoneInputCountrySelect {
+              background: transparent;
+              border: none;
+              outline: none;
+              padding: 0;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              transition: opacity 0.2s;
+            }
+            .phone-input-wrapper .PhoneInputCountrySelect:hover {
+              opacity: 0.8;
+            }
+            .phone-input-wrapper .PhoneInputCountrySelect:focus {
+              outline: none;
+              border: none;
+            }
+            .phone-input-wrapper .PhoneInputCountryIcon {
+              
+              border: none;
+              outline: none;
+              
+            }
+            .phone-input-wrapper .PhoneInputCountrySelectArrow {
+              display: none;
+            }
+            .phone-input-wrapper .PhoneInputInput {
+              width: 100%;
+              background-color: #3C3C3C;
+              color: white;
+              border: none;
+              outline: none;
+              padding: 0.5rem 0.75rem 0.5rem 2.75rem;
+              border-radius: 0.375rem;
+            }
+            .phone-input-wrapper .PhoneInputInput::placeholder {
+              color: rgba(255, 255, 255, 0.5);
+            }
+            .phone-input-wrapper .PhoneInputInput:focus {
+              outline: 2px solid rgba(255, 255, 255, 0.3);
+              outline-offset: 2px;
+            }
+            .phone-input-wrapper select.PhoneInputCountrySelect {
+              appearance: none;
+              -webkit-appearance: none;
+              -moz-appearance: none;
+              border: none;
+              outline: none;
+            }
+          `}</style>
+        </div>
+        <div className="sm:col-span-2">
+          <label className="block text-sm font-medium text-white">
+            {t('auth.password')}
+          </label>
+          <input
+            type="password"
+            {...registerForm.register('password', { required: true })}
+            className="mt-1 w-full rounded-md bg-[#3C3C3C] px-3 py-2 text-white"
+          />
+        </div>
         <button
           type="submit"
           disabled={loading}

@@ -15,19 +15,23 @@ export const AppLayout = () => {
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
   const [notification, setNotification] = useState<AppNotification | null>(null);
   const [hasNotification, setHasNotification] = useState(false);
+  const [reservationRefreshTick, setReservationRefreshTick] = useState(0);
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(id);
   }, []);
 
-  // Fetch notifications when route changes (on navigate)
+  // Poll notifications every 15 seconds
   useEffect(() => {
     if (!user) {
+      setNotification(null);
+      setHasNotification(false);
       return;
     }
+
     let cancelled = false;
-    const frame = requestAnimationFrame(async () => {
+    const fetchNotifications = async () => {
       try {
         const { data } = await api.get("/notifications");
         if (cancelled) return;
@@ -36,6 +40,7 @@ export const AppLayout = () => {
           const first = notifications[0];
           setNotification(first);
           setHasNotification(true);
+          setReservationRefreshTick((prev) => prev + 1);
         } else {
           setNotification(null);
           setHasNotification(false);
@@ -46,12 +51,19 @@ export const AppLayout = () => {
           setHasNotification(false);
         }
       }
-    });
+    };
+
+    // fetch immediately, then on interval
+    void fetchNotifications();
+    const intervalId = setInterval(() => {
+      void fetchNotifications();
+    }, 15_000);
+
     return () => {
       cancelled = true;
-      cancelAnimationFrame(frame);
+      clearInterval(intervalId);
     };
-  }, [location.pathname, user]);
+  }, [user]);
 
   const { timeLabel, dateLabel, greeting } = useMemo(() => {
     const timeLabel = now.toLocaleTimeString(undefined, {
@@ -105,7 +117,7 @@ export const AppLayout = () => {
       <main className="flex-1 overflow-hidden">
         <div className="h-full w-full px-6 pb-6">
           <div className="h-full w-full overflow-hidden rounded-3xl border border-white/5 bg-black/30 backdrop-blur">
-            <Outlet />
+            <Outlet context={{ reservationRefreshTick }} />
           </div>
         </div>
       </main>

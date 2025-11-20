@@ -13,7 +13,7 @@ export const mailer = nodemailer.createTransport({
 
 export const sendVerificationEmail = async (email: string, token: string): Promise<void> => {
   const verifyUrl = `${env.frontendUrl}/auth/verify?token=${token}`;
-  const clientLogoUrl = `${env.frontendUrl}/client.png`;
+  const clientLogoUrl = 'https://i.imgur.com/NhmLmJy.png';
   const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -95,7 +95,7 @@ export const sendVerificationEmail = async (email: string, token: string): Promi
   console.log(`Verification token for ${email}: ${verifyUrl}`);
 };
 
-interface ReservationApprovalData {
+interface ReservationEmailData {
   firstName: string;
   lastName: string;
   tableName: string;
@@ -121,9 +121,9 @@ const formatTime = (timeSlot: string): string => {
 
 export const sendReservationApprovalEmail = async (
   email: string,
-  data: ReservationApprovalData,
+  data: ReservationEmailData,
 ): Promise<void> => {
-  const clientLogoUrl = `${env.frontendUrl}/client.png`;
+  const clientLogoUrl = 'https://i.imgur.com/NhmLmJy.png';
   const formattedDate = formatDate(data.date);
   const formattedTime = formatTime(data.timeSlot);
 
@@ -256,6 +256,121 @@ We look forward to welcoming you!
     // eslint-disable-next-line no-console
     console.error('Failed to send approval email:', error);
     throw error;
+  }
+};
+
+export const sendReservationCancellationEmail = async (
+  email: string,
+  data: ReservationEmailData,
+): Promise<void> => {
+  const clientLogoUrl = `${env.frontendUrl}/client.png`;
+  const formattedDate = formatDate(data.date);
+  const formattedTime = formatTime(data.timeSlot);
+
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reservation Cancelled</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #010101; background-image: url('${env.frontendUrl}/bg.png'); background-size: cover; background-position: center;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: rgba(1, 1, 1, 0.95);">
+    <tr>
+      <td align="center" style="padding: 60px 20px;">
+        <table role="presentation" style="max-width: 600px; width: 100%; border-collapse: collapse; background-color: #1a1a1a; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);">
+          <tr>
+            <td align="center" style="padding: 40px 30px 30px; background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);">
+              <img src="${clientLogoUrl}" alt="Client Logo" style="max-width: 200px; height: auto; display: block;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 40px 30px; background-color: #1a1a1a;">
+              <h1 style="margin: 0 0 20px; font-size: 32px; font-weight: 600; color: #ffffff; text-align: center;">
+                Reservation Cancelled
+              </h1>
+              <p style="margin: 0 0 30px; font-size: 16px; line-height: 1.6; color: #e0e0e0; text-align: center;">
+                Hi ${data.firstName} ${data.lastName},
+              </p>
+              <p style="margin: 0 0 30px; font-size: 16px; line-height: 1.6; color: #e0e0e0; text-align: center;">
+                Your reservation for ${formattedDate} at ${formattedTime} has been cancelled as requested.
+              </p>
+              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #292929; border-radius: 16px; padding: 30px; margin: 30px 0;">
+                <tr>
+                  <td style="padding: 0;">
+                    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                      <tr>
+                        <td style="padding: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                          <p style="margin: 0; font-size: 14px; font-weight: 500; color: #a0a0a0; text-transform: uppercase; letter-spacing: 1px;">Table</p>
+                          <p style="margin: 8px 0 0; font-size: 24px; font-weight: 600; color: #ffffff;">${data.tableName}</p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                          <p style="margin: 0; font-size: 14px; font-weight: 500; color: #a0a0a0; text-transform: uppercase; letter-spacing: 1px;">Date & Time</p>
+                          <p style="margin: 8px 0 0; font-size: 20px; font-weight: 500; color: #ffffff;">${formattedDate} at ${formattedTime}</p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 20px;">
+                          <p style="margin: 0; font-size: 14px; font-weight: 500; color: #a0a0a0; text-transform: uppercase; letter-spacing: 1px;">Guests</p>
+                          <p style="margin: 8px 0 0; font-size: 20px; font-weight: 500; color: #ffffff;">${data.guests} ${data.guests === 1 ? 'Guest' : 'Guests'}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin: 30px 0 0; font-size: 14px; line-height: 1.6; color: #a0a0a0; text-align: center;">
+                We hope to host you again soon. Let us know if you'd like to rebook another time.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 30px; background-color: #0f0f0f; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+              <p style="margin: 0; font-size: 12px; color: #666666;">
+                This is an automated message to confirm your cancellation.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+
+  const text = `
+Reservation Cancelled
+
+Hi ${data.firstName} ${data.lastName},
+
+Your reservation for ${formattedDate} at ${formattedTime} has been cancelled as requested.
+
+Details:
+- Table: ${data.tableName}
+- Guests: ${data.guests}
+
+We hope to host you again soon.
+  `;
+
+  const message = {
+    from: env.smtpFromEmail,
+    to: email,
+    subject: 'Your Reservation Has Been Cancelled',
+    text,
+    html,
+  };
+
+  try {
+    await mailer.sendMail(message);
+    // eslint-disable-next-line no-console
+    console.log(`Cancellation email sent to ${email} for reservation at ${data.tableName}`);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Failed to send cancellation email:', error);
   }
 };
 

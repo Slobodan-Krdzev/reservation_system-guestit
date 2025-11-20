@@ -4,7 +4,7 @@ import { api, getAvatarUrl } from "../services/api";
 import { useAuthStore } from "../store/auth";
 import type { FavoriteReservation, Reservation } from "../types";
 import { ReservationCard } from "../components/reservations/ReservationCard";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
 
 type UpgradeStep = "choose" | "payment" | "success";
 
@@ -20,6 +20,7 @@ export const AccountPage = () => {
   const { user, updateUser } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
+  const { reservationRefreshTick } = useOutletContext<{ reservationRefreshTick: number }>();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [topFavorites, setTopFavorites] = useState<FavoriteReservation[]>([]);
   const [tierModalOpen, setTierModalOpen] = useState(false);
@@ -46,6 +47,16 @@ export const AccountPage = () => {
     });
     return () => cancelAnimationFrame(frame);
   }, [loadReservations]);
+
+  useEffect(() => {
+    if (!reservationRefreshTick) {
+      return;
+    }
+    const frame = requestAnimationFrame(() => {
+      void loadReservations();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [reservationRefreshTick, loadReservations]);
 
   useEffect(() => {
     const state = location.state as { openTierModal?: boolean } | null;

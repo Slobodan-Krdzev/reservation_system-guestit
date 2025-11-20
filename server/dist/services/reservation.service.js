@@ -82,13 +82,46 @@ const createReservation = async (input) => {
 };
 exports.createReservation = createReservation;
 const cancelReservation = async (reservationId, userId) => {
-    const reservation = await Reservation_1.Reservation.findOne({ _id: reservationId, userId });
+    const reservation = await Reservation_1.Reservation.findOne({ _id: reservationId, userId }).populate('userId', 'firstName lastName email');
     if (!reservation) {
         throw (0, httpError_1.createHttpError)(404, 'Reservation not found');
     }
     reservation.status = 'cancelled';
     await reservation.save();
-    return reservation;
+    const populatedUser = reservation.userId;
+    const userObjectId = reservation.userId instanceof mongoose_1.Types.ObjectId
+        ? reservation.userId
+        : populatedUser?._id ?? new mongoose_1.Types.ObjectId(userId);
+    if (populatedUser?.email) {
+        try {
+            await (0, mailer_1.sendReservationCancellationEmail)(populatedUser.email, {
+                firstName: populatedUser.firstName ?? 'Guest',
+                lastName: populatedUser.lastName ?? '',
+                tableName: reservation.tableName || `Table ${reservation.tableId}`,
+                date: reservation.date,
+                timeSlot: reservation.timeSlot,
+                guests: reservation.guests,
+            });
+        }
+        catch (error) {
+            // eslint-disable-next-line no-console
+            console.error(`Failed to send cancellation email for reservation ${reservationId}:`, error);
+        }
+    }
+    try {
+        await Notification_1.Notification.create({
+            userId: userObjectId,
+            type: 'reservationCancelled',
+            message: `Your reservation for ${reservation.tableName || `Table ${reservation.tableId}`} on ${reservation.date} at ${reservation.timeSlot} was cancelled successfully.`,
+            reservationId: reservation._id,
+        });
+    }
+    catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(`Failed to create cancellation notification for reservation ${reservationId}:`, error);
+    }
+    const updatedReservation = await Reservation_1.Reservation.findById(reservation._id);
+    return updatedReservation;
 };
 exports.cancelReservation = cancelReservation;
 const updateReservationStatus = async (reservationId, status) => {

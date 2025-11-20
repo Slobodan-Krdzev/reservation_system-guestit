@@ -30,7 +30,7 @@ export interface Reservation {
 
 export interface AppNotification {
   _id: string;
-  type: 'reservationApproved';
+  type: 'reservationApproved' | 'reservationCancelled';
   message: string;
   reservationId?: string;
   createdAt: string;

@@ -3,7 +3,7 @@ import { Reservation, type ReservationStatus, type IReservation } from '../model
 import { User } from '../models/User';
 import { Notification } from '../models/Notification';
 import { createHttpError } from '../utils/httpError';
-import { sendReservationApprovalEmail } from '../config/mailer';
+import { sendReservationApprovalEmail, sendReservationCancellationEmail } from '../config/mailer';
 
 interface ReservationInput {
   userId: string;
@@ -112,13 +112,54 @@ export const createReservation = async (input: ReservationInput) => {
 };
 
 export const cancelReservation = async (reservationId: string, userId: string) => {
-  const reservation = await Reservation.findOne({ _id: reservationId, userId });
+  const reservation = await Reservation.findOne({ _id: reservationId, userId }).populate<{
+    userId: { _id: Types.ObjectId; firstName: string; lastName: string; email: string };
+  }>('userId', 'firstName lastName email');
   if (!reservation) {
     throw createHttpError(404, 'Reservation not found');
   }
+
   reservation.status = 'cancelled';
   await reservation.save();
-  return reservation;
+
+  const populatedUser = reservation.userId as unknown as { _id?: Types.ObjectId; firstName?: string; lastName?: string; email?: string };
+  const userObjectId =
+    reservation.userId instanceof Types.ObjectId
+      ? reservation.userId
+      : populatedUser?._id ?? new Types.ObjectId(userId);
+
+  if (populatedUser?.email) {
+    try {
+      await sendReservationCancellationEmail(populatedUser.email, {
+        firstName: populatedUser.firstName ?? 'Guest',
+        lastName: populatedUser.lastName ?? '',
+        tableName: reservation.tableName || `Table ${reservation.tableId}`,
+        date: reservation.date,
+        timeSlot: reservation.timeSlot,
+        guests: reservation.guests,
+      });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`Failed to send cancellation email for reservation ${reservationId}:`, error);
+    }
+  }
+
+  try {
+    await Notification.create({
+      userId: userObjectId,
+      type: 'reservationCancelled',
+      message: `Your reservation for ${
+        reservation.tableName || `Table ${reservation.tableId}`
+      } on ${reservation.date} at ${reservation.timeSlot} was cancelled successfully.`,
+      reservationId: reservation._id,
+    });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`Failed to create cancellation notification for reservation ${reservationId}:`, error);
+  }
+
+  const updatedReservation = await Reservation.findById(reservation._id);
+  return updatedReservation;
 };
 
 export const updateReservationStatus = async (
