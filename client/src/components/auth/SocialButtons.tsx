@@ -62,17 +62,17 @@ export const SocialButtons = ({ onSelect }: Props) => {
         <span className='text-xs text-gray-600'>{t('auth.social')}</span>
         <span className="h-px flex-1 bg-gray-600" />
       </div>
-      <div className="space-y-3">
+      <div className="grid grid-cols-3 gap-3 sm:block sm:space-y-3">
         {providers.map((provider) => (
           <button
             key={provider.id}
             onClick={() => onSelect(provider.id)}
-            className={`flex w-full items-center gap-3 rounded-xl border px-4 py-2 text-sm font-semibold transition ${provider.classes}`}
+            className={`flex w-full items-center justify-center md:justify-start gap-3 rounded-xl border px-3 py-3 md:px-4 md:py-2 text-sm font-semibold transition ${provider.classes}`}
           >
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
               {provider.icon}
             </span>
-            <span>{provider.label}</span>
+            <span className="hidden sm:inline">{provider.label}</span>
           </button>
         ))}
       </div>

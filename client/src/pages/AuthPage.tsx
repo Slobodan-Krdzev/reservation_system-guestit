@@ -38,6 +38,15 @@ export const AuthPage = () => {
     }
   }, [user, navigate]);
 
+  useEffect(() => {
+    if (serverMessage) {
+      const timer = setTimeout(() => {
+        setServerMessage(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [serverMessage]);
+
   const handleLogin = async (values: LoginFormValues) => {
     setLoading(true);
     setServerMessage(null);
@@ -283,10 +292,10 @@ export const AuthPage = () => {
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-center bg-[#1A1A1B] px-6 py-10 sm:px-16 rounded-3xl">
+      <div className="flex items-center justify-center bg-[#1A1A1B] px-6 py-6 sm:py-10 sm:px-16 rounded-3xl ">
         <div className="w-full max-w-md space-y-8 text-white">
-          <h1 className='text-center'>Welcome!</h1>
-          <div className="space-y-">
+          <h1 className='text-center text-2xl'>Welcome!</h1>
+          <div className="space-y-4">
             
             {serverMessage && (
               <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
